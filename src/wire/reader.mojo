@@ -710,16 +710,16 @@ struct WireReader[origin: ImmOrigin](Movable):
         var saved_ls = self.line_start
         var saved_als = self.at_line_start
         self.skip_separation()
-        var ok = False
+        var is_null = False
         try:
             var s = self._peek_plain_word()
-            ok = _is_null_word(s)
+            is_null = _is_null_word(s)
         except _:
-            ok = False
+            is_null = False
         self.pos = saved
         self.line_start = saved_ls
         self.at_line_start = saved_als
-        return ok
+        return is_null
 
     def peek_is_map(mut self) raises DecodeError -> Bool:
         var saved = self.pos

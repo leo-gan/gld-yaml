@@ -154,7 +154,7 @@ struct YamlValue(Copyable, Movable):
     def as_bytes(self) raises DecodeError -> List[Byte]:
         if self.kind() != YK_BINARY:
             raise DecodeError(DecodeError.KIND_TYPE, 0)
-        var src = self.bytes[Int(self.nodes[self.root].a)]
+        var src = self.bytes[Int(self.nodes[self.root].a)].copy()
         var out = List[Byte]()
         var i = 0
         while i < len(src):
@@ -280,7 +280,7 @@ def _graft_node(src: YamlValue, idx: Int, mut dest: YamlValue) -> Int:
         var bi = len(dest.bytes)
         var row = List[Byte]()
         var j = 0
-        var srcb = src.bytes[Int(n.a)]
+        var srcb = src.bytes[Int(n.a)].copy()
         while j < len(srcb):
             row.append(srcb[j])
             j += 1
