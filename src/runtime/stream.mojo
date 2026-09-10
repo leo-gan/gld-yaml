@@ -78,5 +78,5 @@ def decode_all_values[
         var n = dec.next_value()
         if not n:
             break
-        out.append(n.value())
+        out.append(n.value().copy())
     return out^
