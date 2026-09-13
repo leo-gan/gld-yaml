@@ -34,6 +34,19 @@ def main() raises:
     test_duplicate_key_rejected()
     test_directive_only_rejected()
     test_yaml13_directive_ok()
+    test_flow_trailing_comma()
+    test_empty_key()
+    test_alias()
+    test_same_line_extra_rejected()
+    test_quoted_nested_rejected()
+    test_compact_seq_map()
+    test_flow_dash_rejected()
+    test_flow_empty_value()
+    test_anchor_redefine()
+    test_same_line_seq_rejected()
+    test_colon_plain_in_flow()
+    test_empty_flow_key()
+    test_dbg4_flow_hash()
     print("test_atom ok")
 
 
@@ -81,6 +94,120 @@ def test_extra_flow_bracket() raises:
         raised = True
     if not raised:
         raise Error("extra ]")
+
+
+def test_flow_trailing_comma() raises:
+    var v = decode_value("[ one, two, ]\n".as_bytes())
+    if v.count() != 2:
+        raise Error("trailing comma seq")
+    v = decode_value("{ sky: blue, sea: green, }\n".as_bytes())
+    if not v.is_map():
+        raise Error("trailing comma map")
+
+
+def test_empty_key() raises:
+    var v = decode_value(": a\n: b\n".as_bytes())
+    if not v.is_map():
+        raise Error("empty keys")
+    if v.count() != 2:
+        raise Error("empty key count")
+
+
+def test_alias() raises:
+    var v = decode_value("first: &harbor kelp\nsecond: *harbor\n".as_bytes())
+    if v.get("first").as_str() != "kelp":
+        raise Error("alias first")
+    if v.get("second").as_str() != "kelp":
+        raise Error("alias second")
+
+
+def test_same_line_extra_rejected() raises:
+    var raised = False
+    try:
+        _ = decode_value("a: b: c: d\n".as_bytes())
+    except _:
+        raised = True
+    if not raised:
+        raise Error("nested implicit")
+
+
+def test_quoted_nested_rejected() raises:
+    var raised = False
+    try:
+        _ = decode_value("---\na: 'b': c\n".as_bytes())
+    except _:
+        raised = True
+    if not raised:
+        raise Error("quoted nested")
+
+
+def test_compact_seq_map() raises:
+    var v = decode_value("- sun: yellow\n- moon: white\n".as_bytes())
+    if not v.is_seq():
+        raise Error("compact seq")
+    if v.count() != 2:
+        raise Error("compact seq count")
+    if v.at(0).get("sun").as_str() != "yellow":
+        raise Error("sun")
+
+
+def test_flow_dash_rejected() raises:
+    var raised = False
+    try:
+        _ = decode_value("[-]\n".as_bytes())
+    except _:
+        raised = True
+    if not raised:
+        raise Error("flow dash")
+
+
+def test_flow_empty_value() raises:
+    var v = decode_value("{ omitted value:, }\n".as_bytes())
+    if not v.is_map():
+        raise Error("empty flow value")
+
+
+def test_anchor_redefine() raises:
+    var v = decode_value(
+        "First occurrence: &anchor Foo\nSecond occurrence: *anchor\nOverride anchor: &anchor Bar\nReuse anchor: *anchor\n".as_bytes()
+    )
+    if v.get("Second occurrence").as_str() != "Foo":
+        raise Error("first alias")
+    if v.get("Reuse anchor").as_str() != "Bar":
+        raise Error("redefined alias")
+
+
+def test_dbg4_flow_hash() raises:
+    var v = decode_value(
+        "- [ ::vector, http://example.com/foo#bar ]\n".as_bytes()
+    )
+    if v.at(0).count() != 2:
+        raise Error("dbg4 flow")
+
+
+def test_empty_flow_key() raises:
+    var v = decode_value("{ : }\n".as_bytes())
+    if not v.is_map():
+        raise Error("empty flow key")
+
+
+def test_colon_plain_in_flow() raises:
+    var v = decode_value("[:x]\n".as_bytes())
+    if not v.is_seq():
+        raise Error("colon plain")
+    v = decode_value("- [ ::vector ]\n".as_bytes())
+    if v.at(0).count() != 1:
+        raise Error("colon colon vector")
+
+
+def test_same_line_seq_rejected() raises:
+    var raised = False
+    try:
+        _ = decode_value("&anchor - sequence entry\n".as_bytes())
+    except _:
+        raised = True
+    if not raised:
+        raise Error("anchor seq")
 
 
 def test_flow_json_object() raises:
