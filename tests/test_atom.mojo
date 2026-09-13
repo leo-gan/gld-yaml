@@ -26,10 +26,61 @@ def main() raises:
     if len(b) < 4:
         raise Error("encode null")
     test_flow_json_object()
+    test_flow_json_spaces()
+    test_nested_block_seq()
+    test_literal_block_value()
+    test_multiline_plain()
+    test_extra_flow_bracket()
     test_duplicate_key_rejected()
     test_directive_only_rejected()
     test_yaml13_directive_ok()
     print("test_atom ok")
+
+
+def test_flow_json_spaces() raises:
+    var v = decode_value("{\"harbor\": \"kelp\", \"tags\": [1, 2]}\n".as_bytes())
+    if not v.is_map():
+        raise Error("flow spaces")
+    if v.get("harbor").as_str() != "kelp":
+        raise Error("harbor spaces")
+    if v.get("tags").count() != 2:
+        raise Error("tags")
+
+
+def test_nested_block_seq() raises:
+    var v = decode_value("- - s1_i1\n  - s1_i2\n- s2\n".as_bytes())
+    if not v.is_seq():
+        raise Error("outer seq")
+    if v.count() != 2:
+        raise Error("outer count")
+    if v.at(0).count() != 2:
+        raise Error("inner count")
+    if v.at(0).at(0).as_str() != "s1_i1":
+        raise Error("s1_i1")
+    if v.at(1).as_str() != "s2":
+        raise Error("s2")
+
+
+def test_literal_block_value() raises:
+    var v = decode_value("note: |\n  line one\n  line two\n".as_bytes())
+    if v.get("note").as_str() != "line one\nline two\n":
+        raise Error("literal")
+
+
+def test_multiline_plain() raises:
+    var v = decode_value("a\nb\n  c\n".as_bytes())
+    if v.as_str() != "a b c":
+        raise Error("plain multi")
+
+
+def test_extra_flow_bracket() raises:
+    var raised = False
+    try:
+        _ = decode_value("---\n[ a, b, c ] ]\n".as_bytes())
+    except _:
+        raised = True
+    if not raised:
+        raise Error("extra ]")
 
 
 def test_flow_json_object() raises:
