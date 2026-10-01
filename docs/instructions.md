@@ -18,7 +18,7 @@ pixi install
 pixi run test
 ```
 
-`pixi.toml` pins `mojo == 1.0.0`. If `pixi install` fails with 401 on
+`pixi.toml` pins `mojo == 1.1.0`. If `pixi install` fails with 401 on
 `conda.modular.com`, put `PREFIX_API_KEY` in a local `.env` (never commit
 that file) and run `scripts/ci-setup.sh`.
 
