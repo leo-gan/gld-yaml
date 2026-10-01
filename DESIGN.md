@@ -8,7 +8,7 @@
 | **Status** | Draft (rev 3) |
 | **Target repo** | `/home/leo/PycharmProjects/GLD/gld-yaml` (greenfield standalone library; only a local `.env` as of 2026-09-10) |
 | **License** | MIT, Copyright (c) 2026 Leonid Ganeline |
-| **Recommended Mojo pin** | `mojo == 1.0.0` (stable, 2026-08-11) |
+| **Recommended Mojo pin** | `mojo == 1.1.0` (stable, 2026-09-17) |
 | **Spec target** | [YAML 1.2.2](https://yaml.org/spec/1.2.2/) **Core schema** tags (`tag:yaml.org,2002:` null / bool / int / float / str / seq / map). `!!binary` is a v1 type-repository extra, not a Core tag. |
 | **Docs** | <https://leo-gan.github.io/gld-yaml/> |
 | **Publish channel** | <https://prefix.dev/leo-gan/leo-gan> |
