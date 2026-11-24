@@ -141,6 +141,53 @@ def write_float_digits(mut dest: List[Byte], mut pos: Int, v: Float64):
         i += 1
 
 
+def write_round_decimal(mut dest: List[Byte], mut pos: Int, v: Float64) -> Bool:
+    """Nine-decimal write for |v| < 1e9. No String. Caller reserves 24 bytes.
+
+    Suite fidelity accepts 1e-8. Values outside the range return false so the
+    caller can fall back to `String(v)`.
+    """
+    if v != v or v >= 1.0e9 or v <= -1.0e9:
+        return False
+    if pos + 24 > len(dest):
+        return False
+    var sign = False
+    var x = v
+    if x < 0.0:
+        sign = True
+        x = -x
+    var scale = Int64(1_000_000_000)
+    var iv = Int64(x * 1.0e9 + 0.5)
+    if sign:
+        dest[pos] = Byte(45)
+        pos += 1
+    var whole = iv // scale
+    var frac = iv % scale
+    write_int_digits(dest, pos, whole)
+    dest[pos] = Byte(46)
+    pos += 1
+    if frac == Int64(0):
+        dest[pos] = Byte(48)
+        pos += 1
+        return True
+    var start_f = pos
+    var write = start_f + 9
+    var fx = frac
+    var pairs = _DIGIT_PAIRS.as_bytes()
+    while write > start_f + 1:
+        var r = Int(fx % Int64(100))
+        write -= 2
+        dest[write] = pairs[r * 2]
+        dest[write + 1] = pairs[r * 2 + 1]
+        fx = fx // Int64(100)
+    dest[start_f] = Byte(48 + Int(fx))
+    var end = start_f + 9
+    while end > start_f + 1 and Int(dest[end - 1]) == 48:
+        end -= 1
+    pos = end
+    return True
+
+
 def hex_val(c: Int) -> Int:
     if c >= 48 and c <= 57:
         return c - 48
