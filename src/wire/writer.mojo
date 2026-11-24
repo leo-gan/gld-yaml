@@ -2,7 +2,7 @@ from std.collections import List, Span
 from std.memory import unsafe_memcpy
 
 from runtime.options import EncodeOptions
-from wire.number import encoded_int_len, write_float_digits, write_int_known
+from wire.number import encoded_int_len, write_float_digits, write_int_known, write_round_decimal
 from wire.scalar import hex_digit_ascii, is_plain_safe
 
 
@@ -122,6 +122,9 @@ struct WireWriter(Movable):
                 self.ensure(n + 2)
                 write_float_digits(self.buf, self.pos, v)
                 return
+        self.ensure(32)
+        if write_round_decimal(self.buf, self.pos, v):
+            return
         var s = String(v)
         self.write_bytes(s.as_bytes())
 
